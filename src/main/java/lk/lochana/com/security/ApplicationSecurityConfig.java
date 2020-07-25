@@ -12,6 +12,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import static lk.lochana.com.security.ApplicationUserRole.ADMIN;
+import static lk.lochana.com.security.ApplicationUserRole.STUDENT;
+
 @Configuration
 @EnableWebSecurity
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -21,14 +24,18 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/", "index").permitAll().anyRequest().authenticated().and().httpBasic();
+        http.authorizeRequests()
+                .antMatchers("/", "index").permitAll()
+                .antMatchers("/api/**").hasRole(STUDENT.name())
+                .anyRequest().authenticated().and().httpBasic();
     }
 
     @Override
     @Bean
     protected UserDetailsService userDetailsService() {
-        UserDetails lochana = User.builder().username("Lochana").password(encoder.encode("nayomi")).roles("Student").build();
+        UserDetails lochana = User.builder().username("Lochana").password(encoder.encode("nayomi")).roles(STUDENT.name()).build();
+        UserDetails rashmika = User.builder().username("Rashmika").password(encoder.encode("nayomi")).roles(ADMIN.name()).build();
 
-        return new InMemoryUserDetailsManager(lochana);
+        return new InMemoryUserDetailsManager(lochana, rashmika);
     }
 }
